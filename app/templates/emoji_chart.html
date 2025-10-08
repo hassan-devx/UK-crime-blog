@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Emoji Usage Chart</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+  {% include 'navbar.html' %}
+  <div class="container py-5">
+    <h2>Emoji Usage 📊</h2>
+    <canvas id="emojiChart"></canvas>
+    <script>
+      const labels = JSON.parse('{{ labels | tojson | safe }}');
+      const data = JSON.parse('{{ data | tojson | safe }}');
+
+      new Chart(document.getElementById('emojiChart'), {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Emoji Usage',
+            data: data,
+            backgroundColor: 'rgba(75, 192, 192, 0.6)'
+          }]
+        },
+        options: { responsive: true }
+      });
+    </script>
+    <a href="{{ url_for('home.dashboard') }}" class="btn btn-secondary mt-4">Back to Dashboard</a>
+  </div>
+</body>
+</html>

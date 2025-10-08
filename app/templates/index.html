@@ -5,13 +5,26 @@
 </head>
 <body>
   
+
+  
   {% include 'navbar.html' %}
+
+  
+
+
+
+
+
     <h1>UK Crime Blog</h1>
     {% for post in posts %}
         <h2>{{ post.title }}</h2>
         <p>{{ post.content[:100] }}...</p>
-        <a href="{{ url_for('show_post', post_id=post.id) }}">Read more</a>
+        <a href="{{ url_for('home.show_post', post_id=post.id) }}">Read more</a>
     {% endfor %}
-    <a href="{{ url_for('heatmap') }}" class="btn btn-info">View Crime Heatmap</a>
+
+
+    <a href="{{ url_for('home.heatmap') }}" class="btn btn-info">View Crime Heatmap</a>
+
+    <a href="{{ url_for('home.dashboard') }}" class="btn btn-secondary">View Dashboard</a>
 </body>
 </html>
