@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Panel</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+  {% include 'navbar.html' %}
+  <div class="container py-5">
+    <h2 class="mb-4">Admin Panel 🛠️</h2>
+
+
+{% if current_user.username == 'Hassan' %}
+  <a href="{{ url_for('admin_bp.user_analytics') }}" class="btn btn-outline-info ms-2">📊 My Analytics</a>
+{% endif %}
+
+{% if current_user.username == 'Hassan' %}
+  <a href="{{ url_for('admin_bp.leaderboard') }}" class="btn btn-outline-warning ms-2">🏆 Leaderboard</a>
+{% endif %}
+
+
+{% if current_user.username == 'Hassan' %}
+  <a href="{{ url_for('admin_bp.inactive_users') }}" class="btn btn-outline-danger ms-2">💤 Inactive Users</a>
+{% endif %}
+
+
+    <!-- Crime Summary -->
+    <div class="mb-5">
+      <h4>Crime Data</h4>
+      <p>Total Crimes: <strong>{{ total_crimes }}</strong></p>
+      <ul class="list-group">
+        {% for crime, count in recent_crimes.items() %}
+          <li class="list-group-item d-flex justify-content-between">
+            {{ crime }} <span class="badge bg-primary">{{ count }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+
+    <!-- Posts -->
+
+
+{% for row in posts %}
+  {% set post = row[0] %}
+  <p class="text-muted small">
+    ❤️ {{ post.reactions|selectattr('emoji', 'equalto', '❤️')|list|length }}
+    😂 {{ post.reactions|selectattr('emoji', 'equalto', '😂')|list|length }}
+    👍 {{ post.reactions|selectattr('emoji', 'equalto', '👍')|list|length }}
+    😢 {{ post.reactions|selectattr('emoji', 'equalto', '😢')|list|length }}
+    😡 {{ post.reactions|selectattr('emoji', 'equalto', '😡')|list|length }}
+  </p>
+{% endfor %}
+
+    <!-- Comments -->
+    <h4 class="mt-5">Recent Comments</h4>
+{% for row in posts %}
+  {% set post = row[0] %}
+  {% set comment_count = row[1] %}
+  <div class="card mb-3">
+    <div class="card-body">
+      <h5>{{ post.title }}</h5>
+      <p class="text-muted">{{ post.timestamp.strftime('%Y-%m-%d %H:%M') }}</p>
+      <p>{{ post.content[:100] }}...</p>
+      <p class="text-muted small">
+        💬 Comments: {{ comment_count }} |
+        👁️ Views: {{ post.views }} |
+        👍 Likes: {{ post.likes }}
+      </p>
+      <p class="text-muted small">
+        {% for emoji in ['❤️', '😂', '👍', '😢', '😡'] %}
+          {{ emoji }} {{ post.reactions | selectattr('emoji', 'equalto', emoji) | list | length }}
+        {% endfor %}
+      </p>
+      <a href="{{ url_for('home.edit_post', post_id=post.id) }}" class="btn btn-sm btn-warning me-2">Edit</a>
+      <form method="POST" action="{{ url_for('home.delete_post', post_id=post.id) }}" style="display:inline;">
+        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+      </form>
+    </div>
+  </div>
+{% endfor %}
+
+
+{% for user in users %}
+  <div class="card mb-3">
+    <div class="card-body">
+      <h5>{{ user.username }}</h5>
+      <p>Posts: {{ user.posts|length }}</p>
+      <p>Comments: {{ user.comments|length }}</p>
+      <p>Reactions Given:
+        {% for emoji in ['❤️', '😂', '👍', '😢', '😡'] %}
+          {{ emoji }} {{ user.reactions | selectattr('emoji', 'equalto', emoji) | list | length }}
+        {% endfor %}
+      </p>
+    </div>
+  </div>
+{% endfor %}
+
+  </div>
+</body>
+</html>

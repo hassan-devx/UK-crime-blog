@@ -1,0 +1,12 @@
+<form method="POST">
+  <div class="mb-3">
+    <label class="form-label">Title</label>
+    <input type="text" name="title" class="form-control" value="{{ post.title }}" required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Content</label>
+    <textarea name="content" class="form-control" rows="10" required>{{ post.content }}</textarea>
+  </div>
+  <button type="submit" class="btn btn-primary">Update Post</button>
+  <a href="{{ url_for('home.show_post', post_id=post.id) }}" class="btn btn-secondary">Cancel</a>
+</form>

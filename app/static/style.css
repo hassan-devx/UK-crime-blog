@@ -1,0 +1,5 @@
+.hero-section {
+  background-image: url('/static/images/hero.jpg');
+  background-size: cover;
+  background-position: center;
+}

@@ -2,6 +2,11 @@ from flask import render_template
 from app import app
 from app.models import Post
 
+import markdown
+import bleach
+
+safe_html = bleach.clean(markdown.markdown(comment.content))
+
 @app.route('/')
 def home():
     return "Homepage is working!"

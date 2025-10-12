@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Comment{% endblock %}
+
+{% block content %}
+  <h3>Edit Your Comment</h3>
+  <form method="POST">
+    <div class="mb-3">
+      <label for="content" class="form-label">Comment</label>
+     <textarea name="content" class="form-control" rows="4">{{ raw_text | safe }}</textarea>
+    </div>
+    <button type="submit" class="btn btn-primary">Update</button>
+    <a href="{{ url_for('home.show_post', post_id=comment.post_id) }}" class="btn btn-secondary ms-2">Cancel</a>
+  </form>
+{% endblock %}
