@@ -1,50 +1,39 @@
 
+from flask import Flask, request
+import os
 
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_login import LoginManager, current_user  # ✅ current_user added
-import markdown
-import bleach
-
+from flask_login import LoginManager, current_user
+from datetime import datetime
 from app.extensions import db
-
-from datetime import datetime, timezone
-
-
-
+from app.models import User
+from app.filters import register_filters 
 
 
 def create_app():
     app = Flask(__name__)
     app.config['SECRET_KEY'] = 'your-secret-key'
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///your-database.db'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(app.instance_path, 'app.db')
 
-
+    # Register blueprints
     from app.routes.admin import admin_bp
-    app.register_blueprint(admin_bp)
-    
     from app.routes.home import home_bp
-    from app.routes.auth import auth_bp  # ✅ move this import here
+    from app.routes.auth import auth_bp
+    from app.routes.ai import ai_bp
 
+    app.register_blueprint(admin_bp)
     app.register_blueprint(home_bp)
-    app.register_blueprint(auth_bp)     # ✅ move this line inside the function
-    
-    
+    app.register_blueprint(auth_bp)
+    app.register_blueprint(ai_bp)
 
+    # Initialize extensions
     login_manager = LoginManager()
     db.init_app(app)
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'
 
-   
-
     from flask_migrate import Migrate
-
     migrate = Migrate()
     migrate.init_app(app, db)
-    
-
-    from app.models import User
 
     @login_manager.user_loader
     def load_user(user_id):
@@ -58,19 +47,20 @@ def create_app():
             current_user.last_seen = datetime.utcnow()
             db.session.commit()
 
+    @app.context_processor
+    def inject_home_button_flag():
+        return {
+            'show_home_button': (
+                current_user.is_authenticated and
+                current_user.role != 'admin' and
+                request.endpoint != 'home.home'
+            )
+        }
+
     return app
-   
-
-    
 
 
-def markdown_filter(text):
-    html = markdown.markdown(text)
-    return bleach.clean(html)
 
-# Register the filter globally
-def register_filters(app):
-    app.jinja_env.filters['markdown'] = markdown_filter
 
 
 

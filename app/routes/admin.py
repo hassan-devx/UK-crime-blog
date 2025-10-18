@@ -1,51 +1,88 @@
 from flask import Blueprint, render_template, abort
 from flask_login import login_required, current_user
 
+from datetime import datetime
 
 from sqlalchemy import func
 from app.models import Post, Comment
 from app import db
 
-admin_bp = Blueprint('admin_bp', __name__, url_prefix='/admin')
+from app.utils.decorators import admin_required
 
+from collections import Counter
+from app.models import Reaction, Comment, Post
 
+admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
 
+@admin_bp.route('/dashboard')
+@admin_required
+def dashboard():
+    crime_counts = {
+        'Burglary': 42,
+        'Robbery': 17,
+        'Assault': 33,
+        'Vandalism': 21
+    }
+
+    year_counts = {
+        2020: 120,
+        2021: 145,
+        2022: 132,
+        2023: 158,
+        2024: 166
+    }
+
+    return render_template('admin/dashboard.html', crime_counts=crime_counts, year_counts=year_counts)
 
 
 
 @admin_bp.route('/')
-@login_required
+@admin_required
 def admin_panel():
-    if current_user.username != 'Hassan':
-        abort(403)
-
-    from app.models import Post, Comment
     import pandas as pd
+    from app.models import Post, Comment, User
 
+    # Load crime data
+    try:
+        df = pd.read_csv(r"C:\Users\User\Desktop\UK-crime-blog\filtered_crime_data.csv")
+        total_crimes = len(df)
+        recent_crimes = df['Crime type'].value_counts().head(5).to_dict()
+    except Exception as e:
+        total_crimes = 0
+        recent_crimes = {}
+        print(f"Error loading crime data: {e}")
+
+    # Fetch posts with comment counts
     posts = db.session.query(
-    Post,
-    func.count(Comment.id).label('comment_count')
+        Post,
+        func.count(Comment.id).label('comment_count')
     ).outerjoin(Comment).group_by(Post.id).order_by(Post.timestamp.desc()).all()
 
-    comments = Comment.query.order_by(Comment.timestamp.desc()).all()
+    # Fetch recent comments
+    comments = Comment.query.order_by(Comment.timestamp.desc()).limit(10).all()
 
-    df = pd.read_csv(r"C:\Users\User\Desktop\UK-crime-blog\filtered_crime_data.csv")
-    total_crimes = len(df)
-    recent_crimes = df['Crime type'].value_counts().head(5).to_dict()
+    # Fetch all users for leaderboard or moderation
+    users = User.query.all()
+
+    # Current year for footer
+    current_year = datetime.utcnow().year
 
     return render_template('admin.html',
                            posts=posts,
                            comments=comments,
+                           users=users,
                            total_crimes=total_crimes,
-                           recent_crimes=recent_crimes)
+                           recent_crimes=recent_crimes,
+                           current_year=current_year)
 
 
 
-@admin_bp.route('/user-analytics')
-@login_required
+
+@admin_bp.route('/user-analytics', endpoint='user_analytics')
+@admin_required
 def user_analytics():
-    from collections import Counter
-    from app.models import Reaction, Comment, Post
+   
+ 
 
     # Get current user's reactions
     reaction_counts = db.session.query(
@@ -60,7 +97,7 @@ def user_analytics():
    
     comments = Comment.query.filter_by(author_id=current_user.id).all()
 
-    return render_template('user_analytics.html',
+    return render_template('admin/user_analytics.html',
                            emoji_totals=emoji_totals,
                            comment_count=comment_count,
                            post_count=post_count)
@@ -87,7 +124,7 @@ def emoji_chart():
 
 
 @admin_bp.route('/leaderboard')
-@login_required
+
 def leaderboard():
     from app.models import User, Post, Comment
     from sqlalchemy import func
@@ -116,3 +153,9 @@ def inactive_users():
     inactive = User.query.filter(User.last_seen < threshold).all()
 
     return render_template('inactive_users.html', inactive=inactive)
+
+
+
+
+
+

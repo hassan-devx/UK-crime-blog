@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash
+from flask import Blueprint, render_template, request, redirect, url_for, flash, abort
 home_bp = Blueprint('home', __name__)
 from sqlalchemy import func
 from app.models import Post, Comment
@@ -20,6 +20,9 @@ from PIL import Image
 from markupsafe import Markup
 import markdown
 
+from app.routes.ai import analyze_sentiment
+from app.routes.ai import summarize_post
+
 @home_bp.route('/post/<int:post_id>')
 def show_post(post_id):
     post = Post.query.get_or_404(post_id)
@@ -38,14 +41,17 @@ import os
 
 @home_bp.route('/create', methods=['GET', 'POST'])
 @login_required
-def new_post():
+def create_post():
+    if current_user.role != 'admin':
+        abort(403)  # Forbidden
+
     form = PostForm()
     if form.validate_on_submit():
         title = form.title.data
         content = form.content.data
+        summary = summarize_post(content)  # ✅ AI summary added
         thumbnail_file = form.thumbnail.data
-        plot_html = None  # ✅ Fix here
-
+        plot_html = None
 
         filename = None
         if thumbnail_file and thumbnail_file.filename != '':
@@ -53,20 +59,26 @@ def new_post():
             thumbnail_path = os.path.join(current_app.root_path, 'static', 'thumbnails', filename)
             thumbnail_file.save(thumbnail_path)
 
-            # Resize and validate
             try:
                 img = Image.open(thumbnail_path)
-                img.verify()  # Check if it's a valid image
-                img = Image.open(thumbnail_path)  # Reopen after verify
-                img = img.convert('RGB')  # Ensure consistent format
-                img.thumbnail((600, 400))  # Resize to max 600x400
+                img.verify()
+                img = Image.open(thumbnail_path)
+                img = img.convert('RGB')
+                img.thumbnail((600, 400))
                 img.save(thumbnail_path)
             except Exception as e:
                 os.remove(thumbnail_path)
                 flash('Invalid image file. Please upload a valid image.', 'danger')
                 return redirect(url_for('home.new_post'))
 
-        post = Post(title=title, content=content, author=current_user, thumbnail=filename, plot_html=plot_html)
+        post = Post(
+            title=title,
+            content=content,
+            summary=summary,  # ✅ Save summary
+            author=current_user,
+            thumbnail=filename,
+            plot_html=plot_html
+        )
         db.session.add(post)
         db.session.commit()
         return redirect(url_for('home.home'))
@@ -127,15 +139,17 @@ def heatmap():
     m.save('app/templates/heatmap.html')
     return render_template('heatmap.html')
 
+import pandas as pd
+from app.models import Post, Comment
+from sqlalchemy import func
 
 @home_bp.route('/dashboard')
 @login_required
 def dashboard():
-    import pandas as pd
-    from app.models import Post, Comment
-    from sqlalchemy import func
+    if current_user.role != 'admin':
+        abort(403)
 
-        # Load data
+            # Load data
     df = pd.read_csv(r"C:\Users\User\Desktop\UK-crime-blog\filtered_crime_data.csv")
     df['Crime type'] = df['Crime type'].str.strip()
     df['City'] = df['LSOA name'].str.extract(r'^([A-Za-z\s]+)\s')
@@ -175,7 +189,7 @@ def dashboard():
         func.count(Comment.id).label('comment_count')
     ).outerjoin(Comment).group_by(Post.id).order_by(Post.timestamp.desc()).all()
 
-    return render_template('dashboard.html',
+    return render_template('admin/dashboard.html',
                         posts=posts,
                         total_crimes=total_crimes,
                         crime_counts=crime_counts,
@@ -328,3 +342,28 @@ def search():
 
 
 
+from app.routes.ai import analyze_sentiment  # make sure this is imported
+
+@home_bp.route('/comment', methods=['POST'])
+@login_required
+def post_comment():
+    comment_text = request.form['content']
+    post_id = request.form['post_id']
+
+    # 🔥 Analyze sentiment using your AI module
+    sentiment = analyze_sentiment(comment_text)
+
+    # 📝 Create and save the comment with sentiment
+    new_comment = Comment(
+        content=comment_text,
+        sentiment=sentiment,
+        user_id=current_user.id,
+        post_id=post_id,
+        timestamp=datetime.utcnow()
+    )
+
+    db.session.add(new_comment)
+    db.session.commit()
+
+    flash('Comment posted with sentiment: {}'.format(sentiment), 'success')
+    return redirect(url_for('home.show_post', post_id=post_id))

@@ -9,27 +9,28 @@
   
 
 
-  {% include 'navbar.html' %}
+{% include 'navbar.html' %}
 
-{% if current_user.username == 'Hassan' %}
-  <a href="{{ url_for('admin_bp.user_analytics') }}" class="btn btn-outline-info ms-2">📊 My Analytics</a>
+
+
+
+
+
+{% if current_user.is_authenticated and current_user.role == 'admin' %}
+  <div class="mb-3">
+    <a href="{{ url_for('admin.user_analytics') }}" class="btn btn-outline-info ms-2">📊 My Analytics</a>
+    <a href="{{ url_for('admin.admin_panel') }}" class="btn btn-outline-dark ms-2">🛠️ Admin Panel</a>
+    <a href="{{ url_for('admin.leaderboard') }}" class="btn btn-outline-warning ms-2">🏆 Leaderboard</a>
+    <a href="{{ url_for('admin.emoji_chart') }}" class="btn btn-outline-primary ms-2">📊 Emoji Chart</a>
+    <a href="{{ url_for('admin.inactive_users') }}" class="btn btn-outline-danger ms-2">💤 Inactive Users</a>
+    
+  </div>
+{% else %}
+  <p class="text-muted">Admin tools are not available for your account.</p>
 {% endif %}
 
 
 
-{% if current_user.username == 'Hassan' %}
-  <a href="{{ url_for('admin_bp.admin_panel') }}" class="btn btn-outline-dark ms-2">🛠️ Admin Panel</a>
-{% endif %}
-
-
-
-{% if current_user.username == 'Hassan' %}
-  <a href="{{ url_for('admin_bp.leaderboard') }}" class="btn btn-outline-warning ms-2">🏆 Leaderboard</a>
-{% endif %}
-
-{% if current_user.username == 'Hassan' %}
-<a href="{{ url_for('admin_bp.emoji_chart') }}" class="btn btn-outline-primary ms-2">📊 Emoji Chart</a>
-{% endif %}
 
 
   <div class="container py-5">
@@ -37,7 +38,7 @@
 
 
 
-    <form method="GET" class="row g-3 mb-4">
+  <form method="GET" class="row g-3 mb-4">
   <select name="crime_type" class="form-select">
   <option value="" {% if not selected_type %}selected{% endif %}>All</option>
   {% for ct in crime_types %}
@@ -72,9 +73,18 @@
   </div>
 {% endif %}
 
+
+{% if crime_counts %}
+  {% for crime, count in crime_counts.items() %}
+    <li>{{ crime }}: {{ count }}</li>
+  {% endfor %}
+{% else %}
+  <p>No crime data available.</p>
+{% endif %}
+
     <!-- Crime Stats -->
-    <button class="btn btn-outline-info mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#statsSection" aria-expanded="true" aria-controls="statsSection">
-  📊 Toggle Crime Stats
+  <button class="btn btn-outline-info mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#statsSection" aria-expanded="true" aria-controls="statsSection">
+📊 Toggle Crime Stats
   </button>
     <div class="collapse show" id="statsSection">
   <div class="row mb-5">
@@ -198,18 +208,17 @@ const crimeYearChart = new Chart(crimeYearCtx, {
     <!-- Blog Posts -->
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h4>Your Blog Posts</h4>
-      <a href="{{ url_for('home.new_post') }}" class="btn btn-success">+ New Post</a>
     </div>
 
 
 
 
 
-
+<p>Logged in as: {{ current_user.username }} | Role: {{ current_user.role }}</p>
 
 {% for row in posts %}
   {% set post = row[0] %}
-  {% set comment_count = row[1] %}
+{% set comment_count = row[1] %}
 
   <div class="card mb-3 shadow-sm">
     <div class="card-body">
@@ -240,17 +249,30 @@ const crimeYearChart = new Chart(crimeYearCtx, {
       </form>
     </div>
   </div>
+
+
+<div class="card-body">
+  <h5 class="card-title">{{ post.title }}</h5>
+  <p class="card-text">{{ post.content[:200] }}...</p>
+
+  {% if post.summary %}
+    <div class="alert alert-info mt-2">
+      <strong>AI Summary:</strong> {{ post.summary }}
+    </div>
+  {% endif %}
+  <a href="{{ url_for('home.view_post', post_id=post.id) }}" class="btn btn-primary">Read More</a>
+</div>
 {% endfor %}
 
-
-
-
   </div>
+
+  <!-- Footer -->
+  <footer class="bg-dark text-white text-center py-3 mt-5">
+    <p class="mb-0">© {{ current_year }} UK Crime Blog. Built by Hassan.</p>
+  </footer>
 </body>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-
 
 
 </html>

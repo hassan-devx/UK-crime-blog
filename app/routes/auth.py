@@ -23,7 +23,8 @@ def register():
             return redirect(url_for('auth.register'))
 
         hashed_password = generate_password_hash(password)
-        user = User(username=username, email=email, password=hashed_password)
+        user = User(username=username, email=email)
+        user.set_password(password)
         db.session.add(user)
         db.session.commit()
         flash("Account created successfully. You can now log in.")
@@ -39,7 +40,7 @@ def login():
         password = request.form['password']
         user = User.query.filter_by(username=username).first()
 
-        if user and check_password_hash(user.password, password):
+        if user and user.check_password(password):
             login_user(user)
             flash(f"Welcome back, {user.username}!")  # ✅ Now inside request context
             return redirect(url_for('home.dashboard'))

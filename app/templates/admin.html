@@ -6,22 +6,17 @@
 </head>
 <body class="bg-light">
   {% include 'navbar.html' %}
+
+
   <div class="container py-5">
+    {% if current_user.is_authenticated and current_user.role == 'admin' %}
     <h2 class="mb-4">Admin Panel 🛠️</h2>
+    {% endif %}
 
 
-{% if current_user.username == 'Hassan' %}
-  <a href="{{ url_for('admin_bp.user_analytics') }}" class="btn btn-outline-info ms-2">📊 My Analytics</a>
-{% endif %}
-
-{% if current_user.username == 'Hassan' %}
-  <a href="{{ url_for('admin_bp.leaderboard') }}" class="btn btn-outline-warning ms-2">🏆 Leaderboard</a>
-{% endif %}
 
 
-{% if current_user.username == 'Hassan' %}
-  <a href="{{ url_for('admin_bp.inactive_users') }}" class="btn btn-outline-danger ms-2">💤 Inactive Users</a>
-{% endif %}
+
 
 
     <!-- Crime Summary -->
@@ -93,8 +88,12 @@
       </p>
     </div>
   </div>
-{% endfor %}
+    {% endfor %}
 
+<!-- Footer -->
+  <footer class="bg-dark text-white text-center py-3 mt-5">
+    <p class="mb-0">© {{ current_year }} UK Crime Blog. Built by Hassan.</p>
+  </footer>
   </div>
 </body>
 </html>

@@ -1,0 +1,11 @@
+{% if post.summary %}
+  <p class="card-text text-muted">
+    <span class="badge bg-primary">AI</span>
+    <strong>Summary:</strong> {{ post.summary }}
+  </p>
+  {% else %}
+  <p class="card-text text-muted">
+    <em>No summary available.</em>
+  </p>
+
+{% endif %}

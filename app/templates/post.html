@@ -23,6 +23,9 @@
 </head>
 <body class="bg-light">
     {% include 'navbar.html' %}
+
+    
+
     <div class="container py-5">
         <h1>{{ post.title }}</h1>
 
@@ -137,11 +140,17 @@
 </div>
   </div>
 {% endfor %}
-
+      {% if current_user.role == 'admin' %}
         <a href="{{ url_for('home.dashboard') }}" class="btn btn-secondary mt-4">Back to Dashboard</a>
+      {% endif %}
+
+       
     </div>
 
   
-    
+    <!-- Footer -->
+  <footer class="bg-dark text-white text-center py-3 mt-5">
+    <p class="mb-0">© {{ current_year }} UK Crime Blog. Built by Hassan.</p>
+  </footer>
 </body>
 </html>

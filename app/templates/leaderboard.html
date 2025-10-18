@@ -28,7 +28,12 @@
         {% endfor %}
       </tbody>
     </table>
-    <a href="{{ url_for('home.dashboard') }}" class="btn btn-secondary mt-4">Back to Dashboard</a>
+    <a href="{{ url_for('admin.dashboard') }}" class="btn btn-secondary mt-4">Back to Dashboard</a>
   </div>
+
+  <!-- Footer -->
+  <footer class="bg-dark text-white text-center py-3 mt-5">
+    <p class="mb-0">© {{ current_year }} UK Crime Blog. Built by Hassan.</p>
+  </footer>
 </body>
 </html>
