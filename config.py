@@ -3,9 +3,10 @@ import os
 # 🔐 Flask App Configuration
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'your-secret-key'
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(os.path.abspath(os.path.dirname(__file__)), 'instance', 'app.db')
+    SQLALCHEMY_DATABASE_URI = os.environ.get('DATABASE_URL') or 'sqlite:///instance/app.db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    DEBUG = True
+    DEBUG = os.environ.get('FLASK_ENV') != 'production'
+
 
 # 📊 Data Pipeline Configuration
 DATA_PATH = "C:/Users/User/Desktop/UK-crime-blog/data_analysis/notebooks/cleaned_crime_data.csv"
