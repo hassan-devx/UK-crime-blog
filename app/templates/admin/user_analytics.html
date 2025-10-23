@@ -35,6 +35,41 @@
   {% endfor %}
 </ul>
 
+
+<div class="card mt-4">
+  <div class="card-header bg-info text-white">Crime Chart</div>
+  <div class="card-body">
+    <div id="crimeChart" style="height: 400px;"></div>
+  </div>
+</div>
+
+<!-- Load Plotly.js -->
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+<script>
+  const labels = {{ chart_labels | safe }};
+  const values = {{ chart_values | safe }};
+
+  const data = [{
+    type: 'pie',
+    labels: labels,
+    values: values,
+    hole: 0.3,
+    textinfo: 'label+percent',
+    textposition: 'outside',
+    automargin: true
+  }];
+
+  const layout = {
+    title: 'Top 5 Crime Types in South Wales',
+    height: 400,
+    margin: { t: 40, b: 20, l: 20, r: 20 }
+  };
+
+  Plotly.newPlot('crimeChart', data, layout);
+</script>
+
+
+
 <!-- Footer -->
   <footer class="bg-dark text-white text-center py-3 mt-5">
     <p class="mb-0">© {{ current_year }} UK Crime Blog. Built by Hassan.</p>

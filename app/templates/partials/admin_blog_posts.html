@@ -1,0 +1,30 @@
+<h4 class="mb-3">Your Blog Posts</h4>
+{% for row in posts %}
+  {% set post = row[0] %}
+  {% set comment_count = row[1] %}
+  <div class="card mb-3 shadow-sm">
+    <div class="card-body">
+      <h5 class="card-title">{{ post.title }}</h5>
+      <h6 class="card-subtitle mb-2 text-muted">{{ post.timestamp.strftime('%Y-%m-%d %H:%M') }}</h6>
+      <p class="card-text">{{ post.content[:150] }}...</p>
+      <p class="text-muted small">
+        👁️ Views: {{ post.views }} |
+        💬 Comments: {{ comment_count }} |
+        👍 Likes: {{ post.likes }}
+      </p>
+      <form method="POST" action="{{ url_for('home.react') }}">
+        <input type="hidden" name="post_id" value="{{ post.id }}">
+        {% for emoji in ['👍', '😂', '❤️', '😢', '😡'] %}
+          <button type="submit" name="emoji" value="{{ emoji }}" class="btn btn-sm btn-light me-1">
+            {{ post.reactions | selectattr('emoji', 'equalto', emoji) | list | length }}
+          </button>
+        {% endfor %}
+      </form>
+      <a href="{{ url_for('home.show_post', post_id=post.id) }}" class="btn btn-sm btn-outline-primary me-2">View</a>
+      <a href="{{ url_for('home.edit_post', post_id=post.id) }}" class="btn btn-sm btn-outline-warning me-2">Edit</a>
+      <form method="POST" action="{{ url_for('home.delete_post', post_id=post.id) }}" style="display:inline;" onsubmit="return confirm('Delete this post?');">
+        <button type="submit" class="btn btn-sm btn-outline-danger">Delete</button>
+      </form>
+    </div>
+  </div>
+{% endfor %}

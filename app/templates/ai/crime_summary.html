@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% block title %}Crime Summary{% endblock %}
+
+{% block content %}
+<!-- Chart + Dropdown -->
+<div class="row mb-4">
+  <div class="col-md-12">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <form method="get" action="{{ url_for('ai_bp.crime_summary') }}" class="mb-3 d-flex flex-wrap gap-3 align-items-center">
+          <div>
+            <label for="month" class="form-label me-2 mb-0">Select Month:</label>
+            <select name="month" id="month" class="form-select w-auto" onchange="this.form.submit()">
+              <option value="">Latest</option>
+              {% for month in available_months %}
+                <option value="{{ month }}" {% if month == selected_month %}selected{% endif %}>{{ month }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          {% if available_regions|length > 1 %}
+          <div>
+            <label for="region" class="form-label me-2 mb-0">Select Region:</label>
+            <select name="region" id="region" class="form-select w-auto" onchange="this.form.submit()">
+              <option value="">All Regions</option>
+              {% for region in available_regions %}
+                <option value="{{ region }}" {% if region == selected_region %}selected{% endif %}>{{ region }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          {% else %}
+          <div>
+            <span class="badge bg-info text-dark">Region: {{ selected_region }}</span>
+          </div>
+          {% endif %}
+        </form>
+
+        {% if selected_month %}
+          <p class="text-muted">Showing data for: <strong>{{ selected_month }}</strong></p>
+        {% endif %}
+
+        <h4 class="card-title">{{ chart_data.title or 'Crime Chart' }}</h4>
+
+        {% if chart_data.labels and chart_data.values %}
+          <div style="height: 400px;">
+            <canvas id="crimeChart"></canvas>
+          </div>
+          <script>
+            const ctx = document.getElementById('crimeChart').getContext('2d');
+            new Chart(ctx, {
+              type: 'bar',
+              data: {
+                labels: {{ chart_data.labels|tojson }},
+                datasets: [{
+                  label: 'Number of Reports',
+                  data: {{ chart_data['values']|tojson }},
+                  backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                  borderColor: 'rgba(54, 162, 235, 1)',
+                  borderWidth: 1
+                }]
+              },
+              options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: { y: { beginAtZero: true } }
+              }
+            });
+          </script>
+        {% else %}
+          <p class="text-muted">No chart data available for this month.</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Summary + Trends -->
+<div class="row g-4 mb-4">
+  <div class="col-md-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <h4 class="card-title">🧠 AI Crime Summary</h4>
+        <p class="card-text">{{ summary }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-body">
+        <h4 class="card-title">📊 Crime Trend Analysis</h4>
+        <p class="card-text">{{ trends }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- AI Insight -->
+<div class="row mb-4">
+  <div class="col-md-12">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h4 class="card-title">🔍 AI Insight</h4>
+        <p class="card-text">{{ ai_insight }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Back Button -->
+<div class="row mb-5">
+  <div class="col-md-12 text-center">
+    <a href="{{ url_for('home.home') }}" class="btn btn-outline-secondary">🏠 Back Home</a>
+  </div>
+</div>
+{% endblock %}

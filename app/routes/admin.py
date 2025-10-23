@@ -34,6 +34,7 @@ def dashboard():
 
     return render_template('admin/dashboard.html', crime_counts=crime_counts, year_counts=year_counts)
 
+from config import DATA_PATH
 
 
 @admin_bp.route('/')
@@ -44,7 +45,8 @@ def admin_panel():
 
     # Load crime data
     try:
-        df = pd.read_csv(r"C:\Users\User\Desktop\UK-crime-blog\filtered_crime_data.csv")
+        df = pd.read_csv(DATA_PATH)
+        df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_')
         total_crimes = len(df)
         recent_crimes = df['Crime type'].value_counts().head(5).to_dict()
     except Exception as e:

@@ -16,12 +16,15 @@ from flask import current_app
 from werkzeug.utils import secure_filename
 from PIL import Image
 
+from datetime import datetime
 
 from markupsafe import Markup
 import markdown
 
 from app.routes.ai import analyze_sentiment
 from app.routes.ai import summarize_post
+
+
 
 @home_bp.route('/post/<int:post_id>')
 def show_post(post_id):
@@ -87,10 +90,7 @@ def create_post():
 
 
 
-#@home_bp.route('/dashboard')
-#def dashboard():
- #   posts = Post.query.order_by(Post.timestamp.desc()).all()
-  #  return render_template('dashboard.html', posts=posts)
+
 
 
 from app.forms import CommentForm
@@ -128,9 +128,9 @@ def heatmap():
     df = pd.read_csv('filtered_crime_data.csv')
 
     if crime_type:
-        df = df[df['Crime Type'] == crime_type]
+        df = df[df['crime_type'] == crime_type]
     if year:
-        df = df[df['Year'] == int(year)]
+        df = df[df['year'] == int(year)]
 
     m = folium.Map(location=[51.6214, -3.9436], zoom_start=12)
     heat_data = df[['Latitude', 'Longitude']].dropna().values.tolist()
@@ -139,31 +139,48 @@ def heatmap():
     m.save('app/templates/heatmap.html')
     return render_template('heatmap.html')
 
-import pandas as pd
+
 from app.models import Post, Comment
 from sqlalchemy import func
+
+
+from config import DATA_PATH
+import pandas as pd
+
+from data_utils import load_cleaned_data
+
+
+from analytics import (
+    get_monthly_trends,
+    get_top_crimes,
+    get_hotspots
+)
 
 @home_bp.route('/dashboard')
 @login_required
 def dashboard():
+    df = load_cleaned_data()
+
     if current_user.role != 'admin':
         abort(403)
 
             # Load data
-    df = pd.read_csv(r"C:\Users\User\Desktop\UK-crime-blog\filtered_crime_data.csv")
-    df['Crime type'] = df['Crime type'].str.strip()
-    df['City'] = df['LSOA name'].str.extract(r'^([A-Za-z\s]+)\s')
-    df['Month'] = df['Month'].str.strip()
+    
+    df = pd.read_csv(DATA_PATH)
+    df.columns = df.columns.str.strip().str.lower().str.replace(' ', '_')
+    df['crime_type'] = df['crime_type'].str.strip()
+    df['city'] = df['lsoa_name'].str.extract(r'^([A-Za-z\s]+)\s')
+    df['month'] = df['month'].str.strip()
 
     # Extract unique values for dropdowns
-    crime_types = sorted(df['Crime type'].unique())
-    regions = sorted(df['City'].dropna().unique())
+    crime_types = sorted(df['crime_type'].unique())
+    regions = sorted(df['city'].dropna().unique())
 
 
-    years = sorted(df['Month'].str[:4].unique())
+    years = sorted(df['month'].str[:4].unique())
 
 
-    print("Extracted cities:", df['City'].unique())
+    print("Extracted cities:", df['city'].unique())
     # Apply filters
     crime_type = request.args.get('crime_type')
     year = request.args.get('year')
@@ -171,17 +188,17 @@ def dashboard():
 
 
     if crime_type:
-        df = df[df['Crime type'] == crime_type]
+        df = df[df['crime_type'] == crime_type]
     if year:
-        df = df[df['Month'].str[:4] == year]
+        df = df[df['month'].str[:4] == year]
     if region:
-        df = df[df['City'] == region]
+        df = df[df['city'] == region]
 
     # Stats
     total_crimes = len(df)
-    crime_counts = {k: int(v) for k, v in df['Crime type'].value_counts().to_dict().items()}
-    df['Year'] = df['Month'].str[:4].astype(int)
-    year_counts = {int(k): int(v) for k, v in df['Year'].value_counts().sort_index().to_dict().items()}
+    crime_counts = {k: int(v) for k, v in df['crime_type'].value_counts().to_dict().items()}
+    df['year'] = df['month'].str[:4].astype(int)
+    year_counts = {int(k): int(v) for k, v in df['year'].value_counts().sort_index().to_dict().items()}
 
     # Posts
     posts = db.session.query(
@@ -189,19 +206,31 @@ def dashboard():
         func.count(Comment.id).label('comment_count')
     ).outerjoin(Comment).group_by(Post.id).order_by(Post.timestamp.desc()).all()
 
-    return render_template('admin/dashboard.html',
-                        posts=posts,
-                        total_crimes=total_crimes,
-                        crime_counts=crime_counts,
-                        year_counts=year_counts,
-                        selected_type=crime_type,
-                        selected_year=year,
-                        selected_region=region,
-                        crime_types=crime_types,
-                        regions=regions,
-                        years=years)
+    df = load_cleaned_data()
 
+    total_crimes = len(df)
+    top_crimes = get_top_crimes(df)
+    hotspots = get_hotspots(df)
+    monthly_trend = get_monthly_trends(df)
 
+    return render_template(
+        'dashboard.html',  # ✅ This stays the same
+        crime_types=crime_types,
+        years=years,
+        regions=regions,
+        selected_type=crime_type,
+        selected_year=year,
+        selected_region=region,
+        total_crimes=total_crimes,
+        crime_counts=crime_counts,
+        year_counts=year_counts,
+        top_crimes=top_crimes.to_dict(),
+        hotspots=hotspots.to_dict(),
+        monthly_trend=monthly_trend.to_dict(),
+        posts=posts
+    )
+
+    
 
 
 @home_bp.route('/like/<int:post_id>', methods=['POST'])
@@ -367,3 +396,8 @@ def post_comment():
 
     flash('Comment posted with sentiment: {}'.format(sentiment), 'success')
     return redirect(url_for('home.show_post', post_id=post_id))
+
+
+
+
+

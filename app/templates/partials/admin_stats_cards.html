@@ -1,0 +1,38 @@
+<div class="row mb-4">
+  <div class="col-md-4">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title">Total Crimes</h5>
+        <p class="display-6">{{ total_crimes }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title">Crimes by Type</h5>
+        <ul class="list-group list-group-flush">
+          {% for crime, count in crime_counts.items() %}
+            <li class="list-group-item d-flex justify-content-between">
+              {{ crime }} <span class="badge bg-primary rounded-pill">{{ count }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card shadow-sm">
+      <div class="card-body">
+        <h5 class="card-title">Crimes by Year</h5>
+        <ul class="list-group list-group-flush">
+          {% for year, count in year_counts.items() %}
+            <li class="list-group-item d-flex justify-content-between">
+              {{ year }} <span class="badge bg-secondary rounded-pill">{{ count }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

@@ -7,14 +7,19 @@
 <body class="bg-light">
   {% include 'navbar.html' %}
 
+  {% if current_user.is_authenticated and current_user.role == 'admin' %}
+    <a href="{{ url_for('ai_bp.crime_summary') }}" class="btn btn-outline-dark ms-2">🧠 AI Crime Summary</a>
+  {% endif %}
 
+
+  
   <div class="container py-5">
     {% if current_user.is_authenticated and current_user.role == 'admin' %}
     <h2 class="mb-4">Admin Panel 🛠️</h2>
     {% endif %}
 
 
-
+ 
 
 
 
@@ -89,6 +94,9 @@
     </div>
   </div>
     {% endfor %}
+
+ 
+
 
 <!-- Footer -->
   <footer class="bg-dark text-white text-center py-3 mt-5">

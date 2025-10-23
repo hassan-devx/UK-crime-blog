@@ -1,0 +1,38 @@
+<div class="card mb-4 shadow-sm">
+  <div class="card-header bg-light">🔍 Filter Crimes</div>
+  <div class="card-body">
+    <form method="GET" class="row g-3">
+      <div class="col-md-4">
+        <label class="form-label">Crime Type</label>
+        <select name="crime_type" class="form-select">
+          <option value="" {% if not selected_type %}selected{% endif %}>All</option>
+          {% for ct in crime_types %}
+            <option value="{{ ct }}" {% if selected_type == ct %}selected{% endif %}>{{ ct }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Year</label>
+        <select name="year" class="form-select">
+          <option value="" {% if not selected_year %}selected{% endif %}>All</option>
+          {% for y in years %}
+            <option value="{{ y }}" {% if selected_year == y %}selected{% endif %}>{{ y }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label class="form-label">Region</label>
+        <select name="region" class="form-select">
+          <option value="" {% if not selected_region %}selected{% endif %}>All</option>
+          {% for r in regions %}
+            <option value="{{ r }}" {% if selected_region == r %}selected{% endif %}>{{ r }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-12 text-end">
+        <button type="submit" class="btn btn-primary">Filter</button>
+        <a href="{{ url_for('home.dashboard') }}" class="btn btn-secondary ms-2">Reset</a>
+      </div>
+    </form>
+  </div>
+</div>

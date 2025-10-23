@@ -1,43 +1,42 @@
-<!-- templates/navbar.html -->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
   <div class="container-fluid">
     <a class="navbar-brand" href="{{ url_for('home.home') }}">UK Crime Blog</a>
-    <div class="collapse navbar-collapse">
-      
-      <ul class="navbar-nav me-auto">
-        {% if current_user.is_authenticated and current_user.role != 'admin' and show_home_button %}
-            <a href="{{ url_for('home.home') }}" class="btn btn-outline-secondary ms-2">🏠 Home</a>
-        {% endif %}
-        
-        {% if current_user.role == 'admin' %}
-          <li class="nav-item">
-            <a class="nav-link" href="{{ url_for('home.dashboard') }}">Admin Dashboard</a>
-          </li>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarContent">
+      <!-- Left side -->
+      <div class="d-flex flex-wrap align-items-center gap-2 me-auto">
+        {% if current_user.is_authenticated %}
           {% if current_user.role == 'admin' %}
-            <li class="nav-item">
-              <a href="{{ url_for('home.create_post') }}" class="btn btn-primary ms-2">New Post</a>
-            </li>
+            <a href="{{ url_for('home.dashboard') }}" class="btn btn-secondary">Dashboard</a>
+            <a href="{{ url_for('ai_bp.crime_summary') }}" class="btn btn-outline-light">AI Crime Dashboard</a>
+            <a href="{{ url_for('home.create_post') }}" class="btn btn-primary">New Post</a>
+          {% else %}
+            {% if show_home_button %}
+              <a href="{{ url_for('home.home') }}" class="btn btn-outline-secondary">🏠 Home</a>
+            {% endif %}
+            <a href="{{ url_for('ai_bp.user_dashboard') }}" class="btn btn-outline-light">Dashboard</a>
           {% endif %}
         {% endif %}
-      </ul>
-      <div class="d-flex">
-        {% if current_user.is_authenticated %}
-          <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-danger me-2">Logout</a>
-        {% else %}
-          <a href="{{ url_for('auth.login') }}" class="btn btn-outline-primary me-2">Login</a>
-          <a href="{{ url_for('auth.register') }}" class="btn btn-outline-success">Register</a>
-        {% endif %}
       </div>
+
+      <!-- Right side -->
+      <ul class="navbar-nav ms-auto">
+        {% if current_user.is_authenticated %}
+          <li class="nav-item">
+            <a href="{{ url_for('auth.logout') }}" class="nav-link">Logout</a>
+          </li>
+        {% else %}
+          <li class="nav-item">
+            <a href="{{ url_for('auth.login') }}" class="nav-link">Login</a>
+          </li>
+          <li class="nav-item">
+            <a href="{{ url_for('auth.register') }}" class="nav-link">Register</a>
+          </li>
+        {% endif %}
+      </ul>
     </div>
   </div>
 </nav>
-
-{% with messages = get_flashed_messages() %}
-  {% if messages %}
-    <div class="alert alert-info mt-3">
-      {% for message in messages %}
-        <div>{{ message }}</div>
-      {% endfor %}
-    </div>
-  {% endif %}
-{% endwith %}

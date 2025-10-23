@@ -1,0 +1,80 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+  <h2 class="mb-3">📊 My Dashboard</h2>
+  <p class="lead">Welcome, {{ current_user.username }}!</p>
+
+  {% if chart_data %}
+    <div class="card shadow-sm mb-4">
+      <div class="card-header bg-primary text-white">
+        {{ chart_data.title }}
+      </div>
+      <ul class="list-group list-group-flush">
+        {% for label, value in zipped_chart_data %}
+          <li class="list-group-item d-flex justify-content-between align-items-center">
+            {{ label }}
+            <span class="badge bg-secondary rounded-pill">{{ value }}</span>
+          </li>
+        {% endfor %}
+      </ul>
+    </div>
+  {% else %}
+    <div class="alert alert-warning">No data available for this region and month.</div>
+  {% endif %}
+
+  <div class="card mt-4">
+    <div class="card-header bg-light">🔮 Coming Soon</div>
+    <div class="card-body">
+      <p class="text-muted">AI-powered insights, interactive charts, and post previews will appear here.</p>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+
+
+<form method="GET" action="{{ url_for('ai_bp.user_dashboard') }}" class="row g-3 mb-4">
+  <div class="col-md-6">
+    <label for="month" class="form-label">Select Month</label>
+    <select name="month" class="form-select">
+      {% for m in available_months %}
+        <option value="{{ m }}" {% if m == selected_month %}selected{% endif %}>{{ m }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-6">
+    <label for="region" class="form-label">Select Region</label>
+    
+    <select name="region" class="form-select">
+      {% for region in available_regions %}
+        <option value="{{ region }}" {% if region == selected_region %}selected{% endif %}>{{ region }}</option>
+        <!-- Add more regions here if needed -->
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-12">
+    <button type="submit" class="btn btn-primary">Update Dashboard</button>
+  </div>
+</form>
+
+
+<div class="card mt-4">
+  <div class="card-header bg-info text-white">Crime Chart</div>
+  <div class="card-body">
+    <div id="crimeChart" style="height: 400px;"></div>
+    <script>
+      const labels = {{ chart_data.labels | tojson }};
+      const values = {{ chart_data.values | tojson }};
+      // Chart rendering logic goes here
+    </script>
+  </div>
+</div>
+
+
+
+ <!-- Footer -->
+  <footer class="bg-dark text-white text-center py-3 mt-5">
+    <p class="mb-0">© {{ current_year }} UK Crime Blog. Built by Hassan.</p>
+  </footer>

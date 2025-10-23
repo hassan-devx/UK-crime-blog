@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard{% endblock %}
+
+{% block content %}
+<div class="mb-3">
+  {% if current_user.is_authenticated and current_user.role == 'admin' %}
+    <a href="{{ url_for('admin.user_analytics') }}" class="btn btn-outline-info me-2">📊 My Analytics</a>
+    <a href="{{ url_for('admin.admin_panel') }}" class="btn btn-outline-dark me-2">🛠️ Admin Panel</a>
+    <a href="{{ url_for('admin.leaderboard') }}" class="btn btn-outline-warning me-2">🏆 Leaderboard</a>
+    <a href="{{ url_for('admin.emoji_chart') }}" class="btn btn-outline-primary me-2">📊 Emoji Chart</a>
+    <a href="{{ url_for('admin.inactive_users') }}" class="btn btn-outline-danger me-2">💤 Inactive Users</a>
+  {% else %}
+    <p class="text-muted">Admin tools are not available for your account.</p>
+  {% endif %}
+</div>
+
+{% include 'partials/admin_filters.html' %}
+{% include 'partials/admin_stats_cards.html' %}
+{% include 'partials/admin_charts.html' %}
+{% include 'partials/admin_blog_posts.html' %}
+{% endblock %}

@@ -1,0 +1,43 @@
+<div class="row mb-5">
+  <div class="col-md-6">
+    <h4 class="mb-3">Crimes by Type</h4>
+    <canvas id="crimeTypeChart"></canvas>
+  </div>
+  <div class="col-md-6">
+    <h4 class="mb-3">Crimes by Year</h4>
+    <canvas id="crimeYearChart"></canvas>
+  </div>
+</div>
+
+<script>
+const crimeTypeCtx = document.getElementById('crimeTypeChart').getContext('2d');
+new Chart(crimeTypeCtx, {
+  type: 'bar',
+  data: {
+    labels: {{ crime_counts.keys()|list|tojson }},
+    datasets: [{
+      label: 'Number of Crimes',
+      data: {{ crime_counts.values()|list|tojson }},
+      backgroundColor: 'rgba(13, 110, 253, 0.6)',
+      borderColor: 'rgba(13, 110, 253, 1)',
+      borderWidth: 1
+    }]
+  },
+  options: { scales: { y: { beginAtZero: true } } }
+});
+
+const crimeYearCtx = document.getElementById('crimeYearChart').getContext('2d');
+new Chart(crimeYearCtx, {
+  type: 'line',
+  data: {
+    labels: {{ year_counts.keys()|list|tojson }},
+    datasets: [{
+      label: 'Crimes per Year',
+      data: {{ year_counts.values()|list|tojson }},
+      borderColor: 'rgba(255, 99, 132, 1)',
+      tension: 0.1
+    }]
+  },
+  options: { scales: { y: { beginAtZero: true } } }
+});
+</script>

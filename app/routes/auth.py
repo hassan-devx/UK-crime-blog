@@ -23,8 +23,13 @@ def register():
             return redirect(url_for('auth.register'))
 
         hashed_password = generate_password_hash(password)
-        user = User(username=username, email=email)
-        user.set_password(password)
+        user = User(
+            username=username,
+            email=email,
+            password_hash=hashed_password,
+            role='user',  # ✅ default role
+            region='South Wales'  # ✅ default region (or let user choose later)
+        )
         db.session.add(user)
         db.session.commit()
         flash("Account created successfully. You can now log in.")
