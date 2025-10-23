@@ -44,3 +44,4 @@ plotly
 openai
 flask_login
 nltk
+markdown
