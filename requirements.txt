@@ -46,3 +46,4 @@ flask_login
 nltk
 markdown
 bleach
+psycopg2-binary
