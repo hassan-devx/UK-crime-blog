@@ -47,3 +47,4 @@ nltk
 markdown
 bleach
 psycopg2-binary
+textblob
