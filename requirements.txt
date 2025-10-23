@@ -43,3 +43,4 @@ python-dotenv
 plotly
 openai
 flask_login
+nltk

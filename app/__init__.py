@@ -16,11 +16,16 @@ from app.models import User  # ✅ Must be imported before migrate.init_app
 
 from dotenv import load_dotenv
 
+import nltk
+
 
 def create_app():
     load_dotenv() # Load environment variables from .env file
     app = Flask(__name__)
     app.config.from_object(Config) 
+
+    
+    nltk.download('vader_lexicon')
 
     # Initialize extensions
     db.init_app(app)
