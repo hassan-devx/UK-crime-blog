@@ -27,6 +27,8 @@ def create_app():
     
     nltk.download('vader_lexicon')
 
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
+    
     # Initialize extensions
     db.init_app(app)
     migrate = Migrate(app, db)
