@@ -1,5 +1,8 @@
-from config import DATA_PATH
+import os
 import pandas as pd
+
+# Define the path to the CSV relative to this file
+DATA_PATH = os.path.join(os.path.dirname(__file__), 'static', 'data', 'cleaned_crime_data.csv')
 
 def load_cleaned_data():
     df = pd.read_csv(DATA_PATH)
