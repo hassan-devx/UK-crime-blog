@@ -22,7 +22,7 @@ import nltk
 def create_app():
     load_dotenv() # Load environment variables from .env file
     app = Flask(__name__)
-    app.config.from_object(Config) 
+    app.config['DEBUG'] = True 
 
     
     nltk.download('vader_lexicon')
