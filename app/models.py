@@ -57,7 +57,7 @@ class User(db.Model, UserMixin):
     password_hash = db.Column(db.String(128), nullable=False)
 
     role_id = db.Column(db.Integer, db.ForeignKey('role.id'), nullable=False)
-    role = db.relationship('Role', backref='users')
+    role = db.relationship('Role', back_populates='users')
 
     region = db.Column(db.String(100), default="South Wales")
     comments = db.relationship('Comment', back_populates='author')
@@ -69,7 +69,6 @@ class User(db.Model, UserMixin):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
-
 
 class Reaction(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -88,4 +87,4 @@ class Role(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String, nullable=False)
 
-    users = db.relationship('User', backref='role', lazy=True)
+    users = db.relationship('User', back_populates='role')
