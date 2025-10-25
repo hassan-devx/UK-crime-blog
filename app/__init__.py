@@ -18,9 +18,10 @@ from dotenv import load_dotenv
 
 import nltk
 
+load_dotenv() # Load environment variables from .env file
 
 def create_app():
-    load_dotenv() # Load environment variables from .env file
+    
     app = Flask(__name__)
     app.config['DEBUG'] = True 
 
@@ -28,7 +29,7 @@ def create_app():
     nltk.download('vader_lexicon')
 
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
-    
+
     # Initialize extensions
     db.init_app(app)
     migrate = Migrate(app, db)

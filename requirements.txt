@@ -49,3 +49,4 @@ bleach
 psycopg2-binary
 textblob
 beautifulsoup4
+psycopg2-binary

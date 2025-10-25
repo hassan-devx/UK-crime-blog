@@ -147,7 +147,7 @@ from sqlalchemy import func
 from config import DATA_PATH
 import pandas as pd
 
-from data_utils import load_cleaned_data
+from ..data_utils import load_cleaned_data
 
 
 from analytics import (

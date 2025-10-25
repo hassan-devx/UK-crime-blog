@@ -7,7 +7,7 @@ import json
 
 from flask_login import current_user
 
-from data_utils import load_cleaned_data
+from ..data_utils import load_cleaned_data
 df = load_cleaned_data()
 
 
@@ -94,7 +94,8 @@ def crime_summary():
         chart_data=chart_data,
         ai_insight=ai_insight,
         available_months=available_months,
-        available_regions=available_regions
+        available_regions=available_regions,
+        selected_region=selected_region
     )
 
 
@@ -147,6 +148,8 @@ def user_dashboard():
     df['month_str'] = df['month'].dt.strftime('%Y-%m')
 
     available_months = sorted(df['month_str'].unique(), reverse=True)
+    available_regions = df['region'].dropna().unique().tolist()
+    available_regions.sort()
 
     if selected_month:
         df = df[df['month_str'] == selected_month]
@@ -171,7 +174,9 @@ def user_dashboard():
         zipped_chart_data=zipped_chart_data,
         available_months=available_months,
         chart_labels=json.dumps(labels),
-        chart_values=json.dumps(values)
-
+        chart_values=json.dumps(values),
+        available_regions=available_regions
     )
+
+
 
